@@ -1,6 +1,6 @@
 ---
-layout: post
-title:  "lkdhruw-codes"
+layout: default
+title:  "fist post"
 date:   2023-01-22 19:06:15 +0530
 categories: jekyll update
 ---

@@ -4,10 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="050f28d7-7fa0-4bd2-b9a9-ebf65f95c926" name="Changes" comment="Updated config">
+    <list default="true" id="050f28d7-7fa0-4bd2-b9a9-ebf65f95c926" name="Changes" comment="Updated">
+      <change afterPath="$PROJECT_DIR$/_includes/disqus_comments.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/footer.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/google-analytics.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/head.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/header.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/icon-github.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/icon-github.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/icon-twitter.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/icon-twitter.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_includes/social.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_layouts/default.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_layouts/home.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_layouts/page.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_layouts/post.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/_posts/2023-01-22-first-post.markdown" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/projects.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Gemfile" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Gemfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Gemfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/_config.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_posts/2023-01-22-welcome-to-jekyll.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/2023-01-22-welcome-to-jekyll.markdown" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/404.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/404.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/about/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/about/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/feed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/_site/feed.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/_site/jekyll/update/2023/01/22/welcome-to-jekyll.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/jekyll/update/2023/01/22/welcome-to-jekyll.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,6 +63,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "C:/Users/lkdhr/WebstormProjects/lkdhruw.github.io",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -48,6 +72,12 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\lkdhr\WebstormProjects\lkdhruw.github.io" />
+      <recent name="C:\Users\lkdhr\WebstormProjects\lkdhruw.github.io\_posts" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -56,7 +86,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1674394017984</updated>
-      <workItem from="1674394021093" duration="3141000" />
+      <workItem from="1674394021093" duration="9725000" />
     </task>
     <task id="LOCAL-00001" summary="First static post">
       <created>1674394080081</created>
@@ -72,7 +102,21 @@
       <option name="project" value="LOCAL" />
       <updated>1674395492802</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Updated">
+      <created>1674397213437</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1674397213437</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Updated">
+      <created>1674397414048</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1674397414048</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -81,6 +125,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First static post" />
     <MESSAGE value="Updated config" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated config" />
+    <MESSAGE value="Updated" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated" />
   </component>
 </project>
