@@ -21,12 +21,19 @@ layout: default
             {{ post.title | escape }}
           </a>
         </h3>
+        <span class="post-meta">{{ post.categories }}</span>
         {%- if site.show_excerpts -%}
           {{ post.excerpt }}
         {%- endif -%}
       </li>
       {%- endfor -%}
     </ul>
+
+    {% assign categories = site.posts | group_by:"category" %}
+
+    {% for category in site.posts-categories %}
+    <h2>{{ category }}</h2>
+    {% endfor %}
 
     <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
   {%- endif -%}

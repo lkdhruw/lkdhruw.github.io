@@ -44,6 +44,19 @@ header_pages:
   - projects.md
   - about.markdown
 
+defaults:
+  - { scope: { path: "_posts/android" }, values:  { category: "Android" } }
+  - { scope: { path: "_posts/arduino" }, values:  { category: "Arduino" } }
+  - { scope: { path: "_posts/matlab" }, values:  { category: "MATLAB" } }
+  - { scope: { path: "_posts/python" }, values:  { category: "MATLAB" } }
+
+posts-categories:
+  - "Android"
+  - "Arduino"
+  - "MATLAB"
+  - "Python"
+
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to
