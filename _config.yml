@@ -48,7 +48,7 @@ defaults:
   - { scope: { path: "_posts/android" }, values:  { category: "Android" } }
   - { scope: { path: "_posts/arduino" }, values:  { category: "Arduino" } }
   - { scope: { path: "_posts/matlab" }, values:  { category: "MATLAB" } }
-  - { scope: { path: "_posts/python" }, values:  { category: "MATLAB" } }
+  - { scope: { path: "_posts/python" }, values:  { category: "Python" } }
 
 posts-categories:
   - "Android"

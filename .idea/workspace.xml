@@ -4,16 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="050f28d7-7fa0-4bd2-b9a9-ebf65f95c926" name="Changes" comment="More updates">
-      <change afterPath="$PROJECT_DIR$/_posts/python/2023-01-22-Video-to-frame.markdown" afterDir="false" />
+    <list default="true" id="050f28d7-7fa0-4bd2-b9a9-ebf65f95c926" name="Changes" comment="Tested first code post">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/_config.yml" beforeDir="false" afterPath="$PROJECT_DIR$/_config.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_layouts/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/_layouts/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_posts/2023-01-22-first-post.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/2023-01-22-first-post.markdown" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_posts/2023-01-22-welcome-to-jekyll.markdown" beforeDir="false" afterPath="$PROJECT_DIR$/_posts/2023-01-22-welcome-to-jekyll.markdown" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_site/feed.xml" beforeDir="false" afterPath="$PROJECT_DIR$/_site/feed.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_site/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/_site/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_site/jekyll/update/2023/01/22/welcome-to-jekyll.html" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,7 +66,8 @@
       <workItem from="1674394021093" duration="9803000" />
       <workItem from="1674411480234" duration="3380000" />
       <workItem from="1674451767788" duration="1317000" />
-      <workItem from="1674538887110" duration="196000" />
+      <workItem from="1674538887110" duration="338000" />
+      <workItem from="1674646085796" duration="41000" />
     </task>
     <task id="LOCAL-00001" summary="First static post">
       <created>1674394080081</created>
@@ -110,7 +104,14 @@
       <option name="project" value="LOCAL" />
       <updated>1674407451910</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Tested first code post">
+      <created>1674539214044</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1674539214044</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -121,6 +122,7 @@
     <MESSAGE value="Updated config" />
     <MESSAGE value="Updated" />
     <MESSAGE value="More updates" />
-    <option name="LAST_COMMIT_MESSAGE" value="More updates" />
+    <MESSAGE value="Tested first code post" />
+    <option name="LAST_COMMIT_MESSAGE" value="Tested first code post" />
   </component>
 </project>
