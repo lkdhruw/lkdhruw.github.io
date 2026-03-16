@@ -41,8 +41,8 @@ plugins:
 
 # Header pages (Appear on navigation)
 header_pages:
+  - profile.md
   - projects.md
-  - about.markdown
 
 defaults:
   - { scope: { path: "_posts/android" }, values:  { category: "Android" } }
