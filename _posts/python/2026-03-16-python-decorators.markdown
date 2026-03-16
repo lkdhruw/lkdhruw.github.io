@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Python Decorators: A Simple Example"
-date: 2026-03-16 10:00:00 +0530
+date: 2026-03-15 10:00:00 +0530
 categories: Python
 ---
 

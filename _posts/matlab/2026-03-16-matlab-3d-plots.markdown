@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "MATLAB: Generating Stunning 3D Surface Plots"
-date:   2026-03-16 12:00:00 +0530
+date: 2026-03-15 12:00:00 +0530
 categories: MATLAB
 ---
 

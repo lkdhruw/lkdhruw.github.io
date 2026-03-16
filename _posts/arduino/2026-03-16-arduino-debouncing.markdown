@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Arduino: Debouncing a Push Button Correctly"
-date:   2026-03-16 11:00:00 +0530
+date: 2026-03-15 11:00:00 +0530
 categories: Arduino
 ---
 
