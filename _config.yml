@@ -41,6 +41,7 @@ plugins:
 
 # Header pages (Appear on navigation)
 header_pages:
+  - search.md
   - profile.md
   - projects.md
 
