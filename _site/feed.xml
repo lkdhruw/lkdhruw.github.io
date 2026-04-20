@@ -1,125 +1,479 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.9.2">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2023-01-25T16:59:17+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">lkdhruw-codes</title><subtitle></subtitle><entry><title type="html">Video to frame</title><link href="http://localhost:4000/python/2023/01/22/Video-to-frame.html" rel="alternate" type="text/html" title="Video to frame" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/python/2023/01/22/Video-to-frame</id><content type="html" xml:base="http://localhost:4000/python/2023/01/22/Video-to-frame.html">&lt;p&gt;Extract and save the frames from a video file to local directory.&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.10.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2026-03-17T10:30:08+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">Laxmi Kant Dhruw</title><subtitle></subtitle><entry><title type="html">Arduino Uno R4 WiFi: WebSocket Server and Web Client</title><link href="http://localhost:4000/arduino/2026/03/17/arduino-r4-websocket.html" rel="alternate" type="text/html" title="Arduino Uno R4 WiFi: WebSocket Server and Web Client" /><published>2026-03-17T10:00:00+05:30</published><updated>2026-03-17T10:00:00+05:30</updated><id>http://localhost:4000/arduino/2026/03/17/arduino-r4-websocket</id><content type="html" xml:base="http://localhost:4000/arduino/2026/03/17/arduino-r4-websocket.html"><![CDATA[<p>The Arduino Uno R4 WiFi comes with an onboard ESP32-S3 co-processor that handles all WiFi connectivity, making it straightforward to run a WebSocket server directly on your board. In this post, we’ll set up a simple WebSocket server on the Arduino and build a minimal webpage that connects to it.</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;os&lt;/span&gt;
-&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;cv2&lt;/span&gt;
+<hr />
+
+<h2 id="what-youll-need">What You’ll Need</h2>
+
+<ul>
+  <li>Arduino Uno R4 WiFi</li>
+  <li>Arduino IDE with the <strong>Arduino UNO R4 WiFi</strong> board package installed</li>
+  <li>The <strong>ArduinoWebsockets</strong> library (install via Library Manager)</li>
+  <li>A computer on the <strong>same local network</strong> as the Arduino</li>
+</ul>
+
+<hr />
+
+<h2 id="arduino-sketch">Arduino Sketch</h2>
+
+<p>The sketch below:</p>
+<ol>
+  <li>Connects the board to your WiFi network</li>
+  <li>Starts a WebSocket server on port <strong>8080</strong></li>
+  <li>Echoes back any message it receives (with a prefix) and can broadcast to all connected clients</li>
+</ol>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="cp">#include</span> <span class="cpf">&lt;WiFiS3.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;ArduinoWebsockets.h&gt;</span><span class="cp">
+</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="n">websockets</span><span class="p">;</span>
+
+<span class="c1">// ── WiFi credentials ──────────────────────────────────────────────────────────</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">SSID</span>     <span class="o">=</span> <span class="s">"YOUR_SSID"</span><span class="p">;</span>
+<span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">PASSWORD</span> <span class="o">=</span> <span class="s">"YOUR_PASSWORD"</span><span class="p">;</span>
+
+<span class="c1">// ── WebSocket server on port 8080 ─────────────────────────────────────────────</span>
+<span class="n">WebsocketsServer</span> <span class="n">wsServer</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="mi">115200</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="o">!</span><span class="n">Serial</span><span class="p">)</span> <span class="p">{</span> <span class="p">;</span> <span class="p">}</span>
+
+  <span class="c1">// Connect to WiFi</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Connecting to WiFi"</span><span class="p">);</span>
+  <span class="n">WiFi</span><span class="p">.</span><span class="n">begin</span><span class="p">(</span><span class="n">SSID</span><span class="p">,</span> <span class="n">PASSWORD</span><span class="p">);</span>
+  <span class="k">while</span> <span class="p">(</span><span class="n">WiFi</span><span class="p">.</span><span class="n">status</span><span class="p">()</span> <span class="o">!=</span> <span class="n">WL_CONNECTED</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">delay</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"."</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">Connected! IP address: "</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">WiFi</span><span class="p">.</span><span class="n">localIP</span><span class="p">());</span>   <span class="c1">// &lt;-- note this IP for the webpage</span>
+
+  <span class="c1">// Start the WebSocket server</span>
+  <span class="n">wsServer</span><span class="p">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+  <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"WebSocket server listening on port 8080"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// Accept a new incoming connection when available</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">wsServer</span><span class="p">.</span><span class="n">poll</span><span class="p">())</span> <span class="p">{</span>
+    <span class="n">WebsocketsClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">wsServer</span><span class="p">.</span><span class="n">accept</span><span class="p">();</span>
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"Client connected"</span><span class="p">);</span>
+
+    <span class="c1">// Handle messages while the client stays connected</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">client</span><span class="p">.</span><span class="n">available</span><span class="p">())</span> <span class="p">{</span>
+      <span class="n">WebsocketsMessage</span> <span class="n">msg</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="n">readBlocking</span><span class="p">();</span>
+
+      <span class="n">Serial</span><span class="p">.</span><span class="n">print</span><span class="p">(</span><span class="s">"Received: "</span><span class="p">);</span>
+      <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="n">msg</span><span class="p">.</span><span class="n">data</span><span class="p">());</span>
+
+      <span class="c1">// Echo the message back with a prefix</span>
+      <span class="n">client</span><span class="p">.</span><span class="n">send</span><span class="p">(</span><span class="s">"Echo: "</span> <span class="o">+</span> <span class="n">msg</span><span class="p">.</span><span class="n">data</span><span class="p">());</span>
+    <span class="p">}</span>
+
+    <span class="n">Serial</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">"Client disconnected"</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span></code></pre></figure>
+
+<blockquote>
+  <p><strong>Tip:</strong> After uploading, open the Serial Monitor at <strong>115200 baud</strong> and note the IP address printed there — you’ll need it for the webpage.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="web-client">Web Client</h2>
+
+<p>Save the HTML below as <code class="language-plaintext highlighter-rouge">index.html</code> and open it in any browser on the <strong>same network</strong> as the Arduino. Replace <code class="language-plaintext highlighter-rouge">192.168.1.XXX</code> with the IP address shown in the Serial Monitor.</p>
+
+<figure class="highlight"><pre><code class="language-html" data-lang="html"><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="nt">&lt;html</span> <span class="na">lang=</span><span class="s">"en"</span><span class="nt">&gt;</span>
+<span class="nt">&lt;head&gt;</span>
+  <span class="nt">&lt;meta</span> <span class="na">charset=</span><span class="s">"UTF-8"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;title&gt;</span>Arduino R4 WebSocket Client<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;style&gt;</span>
+    <span class="nt">body</span> <span class="p">{</span> <span class="nl">font-family</span><span class="p">:</span> <span class="nb">sans-serif</span><span class="p">;</span> <span class="nl">max-width</span><span class="p">:</span> <span class="m">600px</span><span class="p">;</span> <span class="nl">margin</span><span class="p">:</span> <span class="m">2rem</span> <span class="nb">auto</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nf">#log</span>  <span class="p">{</span> <span class="nl">border</span><span class="p">:</span> <span class="m">1px</span> <span class="nb">solid</span> <span class="m">#ccc</span><span class="p">;</span> <span class="nl">padding</span><span class="p">:</span> <span class="m">1rem</span><span class="p">;</span> <span class="nl">height</span><span class="p">:</span> <span class="m">200px</span><span class="p">;</span>
+            <span class="nl">overflow-y</span><span class="p">:</span> <span class="nb">auto</span><span class="p">;</span> <span class="nl">background</span><span class="p">:</span> <span class="m">#f9f9f9</span><span class="p">;</span> <span class="nl">margin-bottom</span><span class="p">:</span> <span class="m">1rem</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">input</span> <span class="p">{</span> <span class="nl">width</span><span class="p">:</span> <span class="m">70%</span><span class="p">;</span> <span class="nl">padding</span><span class="p">:</span> <span class="m">.5rem</span><span class="p">;</span> <span class="p">}</span>
+    <span class="nt">button</span> <span class="p">{</span> <span class="nl">padding</span><span class="p">:</span> <span class="m">.5rem</span> <span class="m">1rem</span><span class="p">;</span> <span class="nl">cursor</span><span class="p">:</span> <span class="nb">pointer</span><span class="p">;</span> <span class="p">}</span>
+  <span class="nt">&lt;/style&gt;</span>
+<span class="nt">&lt;/head&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+  <span class="nt">&lt;h1&gt;</span>Arduino R4 WebSocket Demo<span class="nt">&lt;/h1&gt;</span>
+
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"status"</span><span class="nt">&gt;</span>Status: <span class="nt">&lt;strong</span> <span class="na">id=</span><span class="s">"statusText"</span><span class="nt">&gt;</span>Disconnected<span class="nt">&lt;/strong&gt;&lt;/div&gt;</span>
+  <span class="nt">&lt;br</span> <span class="nt">/&gt;</span>
+
+  <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"connectBtn"</span> <span class="na">onclick=</span><span class="s">"connect()"</span><span class="nt">&gt;</span>Connect<span class="nt">&lt;/button&gt;</span>
+  <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"disconnectBtn"</span> <span class="na">onclick=</span><span class="s">"disconnect()"</span> <span class="na">disabled</span><span class="nt">&gt;</span>Disconnect<span class="nt">&lt;/button&gt;</span>
+
+  <span class="nt">&lt;br</span> <span class="nt">/&gt;&lt;br</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">id=</span><span class="s">"log"</span><span class="nt">&gt;&lt;/div&gt;</span>
+
+  <span class="nt">&lt;input</span>  <span class="na">id=</span><span class="s">"msgInput"</span>  <span class="na">type=</span><span class="s">"text"</span> <span class="na">placeholder=</span><span class="s">"Type a message…"</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;button</span> <span class="na">id=</span><span class="s">"sendBtn"</span>   <span class="na">onclick=</span><span class="s">"sendMessage()"</span> <span class="na">disabled</span><span class="nt">&gt;</span>Send<span class="nt">&lt;/button&gt;</span>
+
+  <span class="nt">&lt;script&gt;</span>
+    <span class="c1">// ── Change this to your Arduino's IP address ──────────────────────────────</span>
+    <span class="kd">const</span> <span class="nx">ARDUINO_IP</span>   <span class="o">=</span> <span class="dl">"</span><span class="s2">192.168.1.XXX</span><span class="dl">"</span><span class="p">;</span>
+    <span class="kd">const</span> <span class="nx">ARDUINO_PORT</span> <span class="o">=</span> <span class="mi">8080</span><span class="p">;</span>
+    <span class="c1">// ─────────────────────────────────────────────────────────────────────────</span>
+
+    <span class="kd">let</span> <span class="nx">ws</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="kd">function</span> <span class="nx">log</span><span class="p">(</span><span class="nx">msg</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">div</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">log</span><span class="dl">"</span><span class="p">);</span>
+      <span class="nx">div</span><span class="p">.</span><span class="nx">innerHTML</span> <span class="o">+=</span> <span class="s2">`&lt;p&gt;</span><span class="p">${</span><span class="nx">msg</span><span class="p">}</span><span class="s2">&lt;/p&gt;`</span><span class="p">;</span>
+      <span class="nx">div</span><span class="p">.</span><span class="nx">scrollTop</span> <span class="o">=</span> <span class="nx">div</span><span class="p">.</span><span class="nx">scrollHeight</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">setStatus</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">color</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">el</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">statusText</span><span class="dl">"</span><span class="p">);</span>
+      <span class="nx">el</span><span class="p">.</span><span class="nx">textContent</span> <span class="o">=</span> <span class="nx">text</span><span class="p">;</span>
+      <span class="nx">el</span><span class="p">.</span><span class="nx">style</span><span class="p">.</span><span class="nx">color</span>  <span class="o">=</span> <span class="nx">color</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">connect</span><span class="p">()</span> <span class="p">{</span>
+      <span class="nx">ws</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">WebSocket</span><span class="p">(</span><span class="s2">`ws://</span><span class="p">${</span><span class="nx">ARDUINO_IP</span><span class="p">}</span><span class="s2">:</span><span class="p">${</span><span class="nx">ARDUINO_PORT</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+
+      <span class="nx">ws</span><span class="p">.</span><span class="nx">onopen</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">setStatus</span><span class="p">(</span><span class="dl">"</span><span class="s2">Connected</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">green</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">✅ Connected to Arduino</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">connectBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span>    <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">disconnectBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">sendBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span>       <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="nx">ws</span><span class="p">.</span><span class="nx">onmessage</span> <span class="o">=</span> <span class="p">(</span><span class="nx">event</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">log</span><span class="p">(</span><span class="s2">`⬅️  </span><span class="p">${</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+      <span class="p">};</span>
+
+      <span class="nx">ws</span><span class="p">.</span><span class="nx">onclose</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">setStatus</span><span class="p">(</span><span class="dl">"</span><span class="s2">Disconnected</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">red</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nx">log</span><span class="p">(</span><span class="dl">"</span><span class="s2">❌ Disconnected from Arduino</span><span class="dl">"</span><span class="p">);</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">connectBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span>    <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">disconnectBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">sendBtn</span><span class="dl">"</span><span class="p">).</span><span class="nx">disabled</span>       <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="nx">ws</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+      <span class="p">};</span>
+
+      <span class="nx">ws</span><span class="p">.</span><span class="nx">onerror</span> <span class="o">=</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="nx">log</span><span class="p">(</span><span class="s2">`⚠️  WebSocket error — check the IP address and port`</span><span class="p">);</span>
+      <span class="p">};</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">disconnect</span><span class="p">()</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">ws</span><span class="p">)</span> <span class="nx">ws</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">function</span> <span class="nx">sendMessage</span><span class="p">()</span> <span class="p">{</span>
+      <span class="kd">const</span> <span class="nx">input</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">msgInput</span><span class="dl">"</span><span class="p">);</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">ws</span> <span class="o">&amp;&amp;</span> <span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">.</span><span class="nx">trim</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">ws</span><span class="p">.</span><span class="nx">send</span><span class="p">(</span><span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">);</span>
+        <span class="nx">log</span><span class="p">(</span><span class="s2">`➡️  </span><span class="p">${</span><span class="nx">input</span><span class="p">.</span><span class="nx">value</span><span class="p">}</span><span class="s2">`</span><span class="p">);</span>
+        <span class="nx">input</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="dl">""</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Allow pressing Enter to send</span>
+    <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="dl">"</span><span class="s2">msgInput</span><span class="dl">"</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="dl">"</span><span class="s2">keydown</span><span class="dl">"</span><span class="p">,</span> <span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="k">if</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">key</span> <span class="o">===</span> <span class="dl">"</span><span class="s2">Enter</span><span class="dl">"</span><span class="p">)</span> <span class="nx">sendMessage</span><span class="p">();</span> <span class="p">});</span>
+  <span class="nt">&lt;/script&gt;</span>
+<span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span></code></pre></figure>
+
+<hr />
+
+<h2 id="how-it-works">How It Works</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Step</th>
+      <th>What happens</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Arduino boots</td>
+      <td>Joins your WiFi network and starts listening on port 8080</td>
+    </tr>
+    <tr>
+      <td>Webpage loads</td>
+      <td>You click <strong>Connect</strong> — the browser opens a <code class="language-plaintext highlighter-rouge">ws://</code> connection to the Arduino</td>
+    </tr>
+    <tr>
+      <td>You type &amp; send</td>
+      <td>The message travels over WebSocket to the Arduino</td>
+    </tr>
+    <tr>
+      <td>Arduino echoes</td>
+      <td>The board prefixes the message with <code class="language-plaintext highlighter-rouge">"Echo: "</code> and sends it back</td>
+    </tr>
+    <tr>
+      <td>Webpage receives</td>
+      <td>The reply is displayed in the log area</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="things-to-try-next">Things to Try Next</h2>
+
+<ul>
+  <li><strong>Control an LED</strong> — parse incoming messages and toggle <code class="language-plaintext highlighter-rouge">LED_BUILTIN</code></li>
+  <li><strong>Push sensor data</strong> — use <code class="language-plaintext highlighter-rouge">client.send(String(analogRead(A0)))</code> on a timer to stream readings to the browser</li>
+  <li><strong>Multiple clients</strong> — the server can be extended to store clients in a list and broadcast to all of them</li>
+</ul>
+
+<hr />
+
+<p>That’s it! You now have a fully bidirectional, real-time link between your Arduino Uno R4 WiFi and any browser on your local network — no extra hardware required.</p>]]></content><author><name></name></author><category term="Arduino" /><summary type="html"><![CDATA[The Arduino Uno R4 WiFi comes with an onboard ESP32-S3 co-processor that handles all WiFi connectivity, making it straightforward to run a WebSocket server directly on your board. In this post, we’ll set up a simple WebSocket server on the Arduino and build a minimal webpage that connects to it.]]></summary></entry><entry><title type="html">MATLAB: Generating Stunning 3D Surface Plots</title><link href="http://localhost:4000/matlab/2026/03/15/matlab-3d-plots.html" rel="alternate" type="text/html" title="MATLAB: Generating Stunning 3D Surface Plots" /><published>2026-03-15T12:00:00+05:30</published><updated>2026-03-15T12:00:00+05:30</updated><id>http://localhost:4000/matlab/2026/03/15/matlab-3d-plots</id><content type="html" xml:base="http://localhost:4000/matlab/2026/03/15/matlab-3d-plots.html"><![CDATA[<p>MATLAB excels at data visualization, especially when dealing with multidimensional matrices. One of the visually most striking ways to represent a function <code class="language-plaintext highlighter-rouge">z = f(x, y)</code> is through a 3D surface plot.</p>
+
+<p>Below is a snippet demonstrating how to generate a classic <em>sinc</em> function surface, commonly modeled as <code class="language-plaintext highlighter-rouge">sin(r)/r</code>, which creates a pattern resembling a drop of water creating ripples in a pond.</p>
+
+<p>We use <code class="language-plaintext highlighter-rouge">meshgrid</code> to generate x and y domains, compute the function, and then use <code class="language-plaintext highlighter-rouge">surf</code> along with some styling commands to make it look professional.</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="c1">% Define the spatial domain for x and y</span>
+<span class="p">[</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">]</span> <span class="o">=</span> <span class="nb">meshgrid</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">:</span><span class="mf">0.2</span><span class="p">:</span><span class="mi">8</span><span class="p">,</span> <span class="o">-</span><span class="mi">8</span><span class="p">:</span><span class="mf">0.2</span><span class="p">:</span><span class="mi">8</span><span class="p">);</span>
+
+<span class="c1">% Calculate corresponding radius R from center (0,0)</span>
+<span class="n">R</span> <span class="o">=</span> <span class="nb">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">.^</span><span class="mi">2</span> <span class="o">+</span> <span class="n">Y</span><span class="o">.^</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">eps</span><span class="p">;</span>
+
+<span class="c1">% Compute the sinc function</span>
+<span class="c1">% Added eps to R to avoid division by zero at the origin</span>
+<span class="n">Z</span> <span class="o">=</span> <span class="nb">sin</span><span class="p">(</span><span class="n">R</span><span class="p">)</span> <span class="o">.</span><span class="p">/</span> <span class="n">R</span><span class="p">;</span>
+
+<span class="c1">% Create a new figure window with a clean white background</span>
+<span class="nb">figure</span><span class="p">(</span><span class="s1">'Color'</span><span class="p">,</span> <span class="s1">'white'</span><span class="p">);</span>
+
+<span class="c1">% Plot the 3D surface</span>
+<span class="nb">surf</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">);</span>
+
+<span class="c1">% Make it look pretty:</span>
+<span class="c1">% Remove the grid lines on the surface itself</span>
+<span class="nb">shading</span> <span class="n">interp</span><span class="p">;</span>  
+
+<span class="c1">% Add a colormap that provides good contrast</span>
+<span class="nb">colormap</span><span class="p">(</span><span class="nb">jet</span><span class="p">);</span>   
+
+<span class="c1">% Add a colorbar to relate colors to Z values</span>
+<span class="nb">colorbar</span><span class="p">;</span>        
+
+<span class="c1">% Adjust lighting to give it depth</span>
+<span class="nb">camlight</span> <span class="n">left</span><span class="p">;</span>
+<span class="nb">lighting</span> <span class="n">phong</span><span class="p">;</span>
+
+<span class="c1">% Add descriptive labels</span>
+<span class="nb">title</span><span class="p">(</span><span class="s1">'3D Surface Plot of completely unnormalized sinc function'</span><span class="p">);</span>
+<span class="nb">xlabel</span><span class="p">(</span><span class="s1">'X-axis'</span><span class="p">);</span>
+<span class="nb">ylabel</span><span class="p">(</span><span class="s1">'Y-axis'</span><span class="p">);</span>
+<span class="nb">zlabel</span><span class="p">(</span><span class="s1">'Amplitude'</span><span class="p">);</span>
+
+<span class="c1">% Optimize the viewing angle</span>
+<span class="nb">view</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">30</span><span class="p">);</span></code></pre></figure>
+
+<h3 id="key-functions-explained">Key Functions Explained:</h3>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">meshgrid</code>: Generates a grid of X and Y coordinate pairs spanning the specified axes, necessary for computing Z natively through matrix operations.</li>
+  <li><code class="language-plaintext highlighter-rouge">eps</code>: Floating-point relative accuracy. Adding this small number (<code class="language-plaintext highlighter-rouge">2.22e-16</code>) prevents a <code class="language-plaintext highlighter-rouge">divide by zero</code> error when evaluating at the origin <code class="language-plaintext highlighter-rouge">(0,0)</code>, without noticeably shifting the resulting plot data.</li>
+  <li><code class="language-plaintext highlighter-rouge">shading interp</code>: Interpolates colors across the faces of the polygons that make up the plot for a smooth finish, rather than displaying blocks of color (<code class="language-plaintext highlighter-rouge">faceted</code> by default).</li>
+  <li><code class="language-plaintext highlighter-rouge">camlight</code> &amp; <code class="language-plaintext highlighter-rouge">lighting phong</code>: Simulates an external light source to give shadows and a sense of curvature to peaks and valleys.</li>
+</ul>
+
+<p>Try substituting your own data or complex math function bounds to see how <code class="language-plaintext highlighter-rouge">surf</code> handles it!</p>]]></content><author><name></name></author><category term="MATLAB" /><summary type="html"><![CDATA[MATLAB excels at data visualization, especially when dealing with multidimensional matrices. One of the visually most striking ways to represent a function z = f(x, y) is through a 3D surface plot.]]></summary></entry><entry><title type="html">Arduino: Debouncing a Push Button Correctly</title><link href="http://localhost:4000/arduino/2026/03/15/arduino-debouncing.html" rel="alternate" type="text/html" title="Arduino: Debouncing a Push Button Correctly" /><published>2026-03-15T11:00:00+05:30</published><updated>2026-03-15T11:00:00+05:30</updated><id>http://localhost:4000/arduino/2026/03/15/arduino-debouncing</id><content type="html" xml:base="http://localhost:4000/arduino/2026/03/15/arduino-debouncing.html"><![CDATA[<p>When working with mechanical push buttons or switches in electronics, you’ll often encounter a phenomenon called “bouncing.” Because the metal contacts inside the switch spring back and forth slightly as they settle into their new position, a microcontroller scanning the pin rapidly will register multiple open and close sequences for a single button press.</p>
+
+<p>If you are trying to toggle an LED state with a button, this results in the LED flickering and ending up in a random state.</p>
+
+<p>To fix this, we implement <strong>software debouncing</strong>. The concept is simple: once a state change is detected, we start a timer and ignore any subsequent state changes for a small window of time (e.g., 50 milliseconds) until the mechanical contact has settled.</p>
+
+<p>Here is a robust example of doing software debouncing on an Arduino:</p>
+
+<figure class="highlight"><pre><code class="language-cpp" data-lang="cpp"><span class="c1">// Constants won't change</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">buttonPin</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>    <span class="c1">// the number of the pushbutton pin</span>
+<span class="k">const</span> <span class="kt">int</span> <span class="n">ledPin</span> <span class="o">=</span> <span class="mi">13</span><span class="p">;</span>      <span class="c1">// the number of the LED pin</span>
+
+<span class="c1">// Variables will change:</span>
+<span class="kt">int</span> <span class="n">ledState</span> <span class="o">=</span> <span class="n">HIGH</span><span class="p">;</span>         <span class="c1">// the current state of the output pin</span>
+<span class="kt">int</span> <span class="n">buttonState</span><span class="p">;</span>             <span class="c1">// the current reading from the input pin</span>
+<span class="kt">int</span> <span class="n">lastButtonState</span> <span class="o">=</span> <span class="n">LOW</span><span class="p">;</span>   <span class="c1">// the previous reading from the input pin</span>
+
+<span class="c1">// the following variables are unsigned longs because the time, measured in</span>
+<span class="c1">// milliseconds, will quickly become a bigger number than can be stored in an int.</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">lastDebounceTime</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// the last time the output pin was toggled</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">debounceDelay</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>    <span class="c1">// the debounce time; increase if the output flickers</span>
+
+<span class="kt">void</span> <span class="nf">setup</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">buttonPin</span><span class="p">,</span> <span class="n">INPUT</span><span class="p">);</span>
+  <span class="n">pinMode</span><span class="p">(</span><span class="n">ledPin</span><span class="p">,</span> <span class="n">OUTPUT</span><span class="p">);</span>
+
+  <span class="c1">// set initial LED state</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">ledPin</span><span class="p">,</span> <span class="n">ledState</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="n">loop</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// read the state of the switch into a local variable:</span>
+  <span class="kt">int</span> <span class="n">reading</span> <span class="o">=</span> <span class="n">digitalRead</span><span class="p">(</span><span class="n">buttonPin</span><span class="p">);</span>
+
+  <span class="c1">// check to see if you just pressed the button</span>
+  <span class="c1">// (i.e. the input went from LOW to HIGH), and you've waited long enough</span>
+  <span class="c1">// since the last press to ignore any noise:</span>
+
+  <span class="c1">// If the switch changed, due to noise or pressing:</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">reading</span> <span class="o">!=</span> <span class="n">lastButtonState</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// reset the debouncing timer</span>
+    <span class="n">lastDebounceTime</span> <span class="o">=</span> <span class="n">millis</span><span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">((</span><span class="n">millis</span><span class="p">()</span> <span class="o">-</span> <span class="n">lastDebounceTime</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">debounceDelay</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// whatever the reading is at, it's been there for longer than the debounce</span>
+    <span class="c1">// delay, so take it as the actual current state:</span>
+
+    <span class="c1">// if the button state has changed:</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">reading</span> <span class="o">!=</span> <span class="n">buttonState</span><span class="p">)</span> <span class="p">{</span>
+      <span class="n">buttonState</span> <span class="o">=</span> <span class="n">reading</span><span class="p">;</span>
+
+      <span class="c1">// only toggle the LED if the new button state is HIGH</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">buttonState</span> <span class="o">==</span> <span class="n">HIGH</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">ledState</span> <span class="o">=</span> <span class="o">!</span><span class="n">ledState</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="c1">// set the LED:</span>
+  <span class="n">digitalWrite</span><span class="p">(</span><span class="n">ledPin</span><span class="p">,</span> <span class="n">ledState</span><span class="p">);</span>
+
+  <span class="c1">// save the reading. Next time through the loop, it'll be the lastButtonState:</span>
+  <span class="n">lastButtonState</span> <span class="o">=</span> <span class="n">reading</span><span class="p">;</span>
+<span class="p">}</span></code></pre></figure>
+
+<h3 id="how-it-works">How it works:</h3>
+<ol>
+  <li><code class="language-plaintext highlighter-rouge">millis()</code> tracks how long the Arduino has been running.</li>
+  <li>Every time a state change occurs on <code class="language-plaintext highlighter-rouge">buttonPin</code>, <code class="language-plaintext highlighter-rouge">lastDebounceTime</code> resets to the current <code class="language-plaintext highlighter-rouge">millis()</code>.</li>
+  <li>We only update <code class="language-plaintext highlighter-rouge">buttonState</code> if <code class="language-plaintext highlighter-rouge">50ms</code> have passed without the physical pin changing state again.</li>
+  <li>Using this pattern never blocks your code (unlike using <code class="language-plaintext highlighter-rouge">delay(50)</code>), meaning your <code class="language-plaintext highlighter-rouge">loop()</code> can go on doing other things like driving displays or reading sensors seamlessly!</li>
+</ol>]]></content><author><name></name></author><category term="Arduino" /><summary type="html"><![CDATA[When working with mechanical push buttons or switches in electronics, you’ll often encounter a phenomenon called “bouncing.” Because the metal contacts inside the switch spring back and forth slightly as they settle into their new position, a microcontroller scanning the pin rapidly will register multiple open and close sequences for a single button press.]]></summary></entry><entry><title type="html">Android: Simple Toast Message Extention</title><link href="http://localhost:4000/android/2026/03/15/android-toast-extension.html" rel="alternate" type="text/html" title="Android: Simple Toast Message Extention" /><published>2026-03-15T10:30:00+05:30</published><updated>2026-03-15T10:30:00+05:30</updated><id>http://localhost:4000/android/2026/03/15/android-toast-extension</id><content type="html" xml:base="http://localhost:4000/android/2026/03/15/android-toast-extension.html"><![CDATA[<p>When developing in Android using Kotlin, extension functions can make your code much cleaner. A common pattern is showing a Toast message, which usually requires passing the context and duration.</p>
+
+<p>Here is a simple Kotlin extension for <code class="language-plaintext highlighter-rouge">Context</code> that makes showing Toasts incredibly easy:</p>
+
+<figure class="highlight"><pre><code class="language-kotlin" data-lang="kotlin"><span class="k">import</span> <span class="nn">android.content.Context</span>
+<span class="k">import</span> <span class="nn">android.widget.Toast</span>
+
+<span class="c1">// Extension function for showing a short Toast message</span>
+<span class="k">fun</span> <span class="nc">Context</span><span class="p">.</span><span class="nf">showToast</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nc">String</span><span class="p">,</span> <span class="n">duration</span><span class="p">:</span> <span class="nc">Int</span> <span class="p">=</span> <span class="nc">Toast</span><span class="p">.</span><span class="nc">LENGTH_SHORT</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nc">Toast</span><span class="p">.</span><span class="nf">makeText</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">duration</span><span class="p">).</span><span class="nf">show</span><span class="p">()</span>
+<span class="p">}</span></code></pre></figure>
+
+<p>Once you define this extension function in your project, you can easily use it in any Activity or Fragment by just calling:</p>
+
+<figure class="highlight"><pre><code class="language-kotlin" data-lang="kotlin"><span class="c1">// Inside an Activity</span>
+<span class="nf">showToast</span><span class="p">(</span><span class="s">"Hello from Kotlin Extension!"</span><span class="p">)</span>
+
+<span class="c1">// Or specifying the duration</span>
+<span class="nf">showToast</span><span class="p">(</span><span class="s">"Long message alert"</span><span class="p">,</span> <span class="nc">Toast</span><span class="p">.</span><span class="nc">LENGTH_LONG</span><span class="p">)</span></code></pre></figure>
+
+<p>This helps keep your UI code clean and prevents you from repeating the <code class="language-plaintext highlighter-rouge">Toast.makeText</code> boilerplate code over and over again.</p>]]></content><author><name></name></author><category term="Android" /><summary type="html"><![CDATA[When developing in Android using Kotlin, extension functions can make your code much cleaner. A common pattern is showing a Toast message, which usually requires passing the context and duration.]]></summary></entry><entry><title type="html">Python Decorators: A Simple Example</title><link href="http://localhost:4000/python/2026/03/15/python-decorators.html" rel="alternate" type="text/html" title="Python Decorators: A Simple Example" /><published>2026-03-15T10:00:00+05:30</published><updated>2026-03-15T10:00:00+05:30</updated><id>http://localhost:4000/python/2026/03/15/python-decorators</id><content type="html" xml:base="http://localhost:4000/python/2026/03/15/python-decorators.html"><![CDATA[<p>Decorators in Python provide a very elegant way to modify the behavior of a function or class. They allow us to wrap another function in order to extend the behavior of the wrapped function, without permanently modifying it.</p>
+
+<p>Here is a simple example of a decorator that measures the execution time of a function:</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">def</span> <span class="nf">timer_decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Function </span><span class="si">{</span><span class="n">func</span><span class="p">.</span><span class="n">__name__</span><span class="si">}</span><span class="s"> took </span><span class="si">{</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="si">:</span><span class="p">.</span><span class="mi">4</span><span class="n">f</span><span class="si">}</span><span class="s"> seconds to execute."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+
+<span class="o">@</span><span class="n">timer_decorator</span>
+<span class="k">def</span> <span class="nf">example_function</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="n">total</span>
+
+<span class="c1"># Calling the decorated function
+</span><span class="n">result</span> <span class="o">=</span> <span class="n">example_function</span><span class="p">(</span><span class="mi">1000000</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="sa">f</span><span class="s">"Result: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s">"</span><span class="p">)</span></code></pre></figure>
+
+<p>When you run this code, the <code class="language-plaintext highlighter-rouge">@timer_decorator</code> automatically wraps <code class="language-plaintext highlighter-rouge">example_function</code>, modifying its behavior to output the execution time.</p>]]></content><author><name></name></author><category term="Python" /><summary type="html"><![CDATA[Decorators in Python provide a very elegant way to modify the behavior of a function or class. They allow us to wrap another function in order to extend the behavior of the wrapped function, without permanently modifying it.]]></summary></entry><entry><title type="html">fist post</title><link href="http://localhost:4000/arduino/2023/01/22/first-post.html" rel="alternate" type="text/html" title="fist post" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/arduino/2023/01/22/first-post</id><content type="html" xml:base="http://localhost:4000/arduino/2023/01/22/first-post.html"><![CDATA[<p>You’ll find this post in your <code class="language-plaintext highlighter-rouge">_posts</code> directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run <code class="language-plaintext highlighter-rouge">jekyll serve</code>, which launches a web server and auto-regenerates your site when a file is updated.</p>
+
+<p>Jekyll requires blog post files to be named according to the following format:</p>
+
+<p><code class="language-plaintext highlighter-rouge">YEAR-MONTH-DAY-title.MARKUP</code></p>
+
+<p>Where <code class="language-plaintext highlighter-rouge">YEAR</code> is a four-digit number, <code class="language-plaintext highlighter-rouge">MONTH</code> and <code class="language-plaintext highlighter-rouge">DAY</code> are both two-digit numbers, and <code class="language-plaintext highlighter-rouge">MARKUP</code> is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
+
+<p>Jekyll also offers powerful support for code snippets:</p>
+
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">print_hi</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+  <span class="nb">puts</span> <span class="s2">"Hi, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+<span class="n">print_hi</span><span class="p">(</span><span class="s1">'Tom'</span><span class="p">)</span>
+<span class="c1">#=&gt; prints 'Hi, Tom' to STDOUT.</span></code></pre></figure>
+
+<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name></name></author><category term="Arduino" /><summary type="html"><![CDATA[You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.]]></summary></entry><entry><title type="html">Video to frame</title><link href="http://localhost:4000/python/2023/01/22/Video-to-frame.html" rel="alternate" type="text/html" title="Video to frame" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/python/2023/01/22/Video-to-frame</id><content type="html" xml:base="http://localhost:4000/python/2023/01/22/Video-to-frame.html"><![CDATA[<p>Extract and save the frames from a video file to local directory.</p>
+
+<figure class="highlight"><pre><code class="language-python" data-lang="python"><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
 
 
-&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;playback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Playback started&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;video_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;_&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;video_file&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;read&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;dn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;output&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exists&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
-            &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;makedirs&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dn&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;fnw&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;_&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;.jpg&quot;&lt;/span&gt;
-        &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Couldn&apos;t get the frame at &quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;str&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;break&lt;/span&gt;
-        &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;try&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;n&quot;&gt;cv2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;imwrite&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dn&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&apos;/&apos;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fnw&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-            &lt;span class=&quot;k&quot;&gt;finally&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-                &lt;span class=&quot;k&quot;&gt;pass&lt;/span&gt;
+<span class="k">def</span> <span class="nf">playback</span><span class="p">():</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Playback started"</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">video_file</span><span class="p">)</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">video_file</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="s">'output'</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dn</span><span class="p">):</span>
+            <span class="n">os</span><span class="p">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dn</span><span class="p">)</span>
+        <span class="n">fnw</span> <span class="o">=</span> <span class="n">filename</span> <span class="o">+</span> <span class="s">"_"</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s">".jpg"</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">"Couldn't get the frame at "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">cv2</span><span class="p">.</span><span class="n">imwrite</span><span class="p">(</span><span class="n">dn</span> <span class="o">+</span> <span class="s">'/'</span> <span class="o">+</span> <span class="n">fnw</span><span class="p">,</span> <span class="n">frame</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">pass</span>
 
 
-&lt;span class=&quot;n&quot;&gt;files&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;VID_1.mp4&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;&quot;VID_2.mp4&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
-        &lt;span class=&quot;s&quot;&gt;&quot;VID_3.mp4&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s">"VID_1.mp4"</span><span class="p">,</span>
+        <span class="s">"VID_2.mp4"</span><span class="p">,</span>
+        <span class="s">"VID_3.mp4"</span><span class="p">]</span>
 
-&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;sa&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;C:\...&quot;&lt;/span&gt;
+<span class="n">loc</span> <span class="o">=</span> <span class="sa">r</span><span class="s">"C:\..."</span>
 
-&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;files&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;file_location&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;os&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;join&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;file_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;filename&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;split&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;video_file&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;cv2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;VideoCapture&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;file_location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-    &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;video_file&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
-        &lt;span class=&quot;nb&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
-    &lt;span class=&quot;n&quot;&gt;playback&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+    <span class="n">file_location</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">join</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">file_location</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">'</span><span class="se">\\</span><span class="s">'</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="s">"."</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">file_location</span><span class="p">)</span>
+    <span class="n">video_file</span> <span class="o">=</span> <span class="n">cv2</span><span class="p">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="n">file_location</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">video_file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="nb">exit</span><span class="p">()</span>
+    <span class="n">playback</span><span class="p">()</span></code></pre></figure>
 
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Python" /><summary type="html">Extract and save the frames from a video file to local directory.</summary></entry><entry><title type="html">fist post</title><link href="http://localhost:4000/arduino/2023/01/22/first-post.html" rel="alternate" type="text/html" title="fist post" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/arduino/2023/01/22/first-post</id><content type="html" xml:base="http://localhost:4000/arduino/2023/01/22/first-post.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
+<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name></name></author><category term="Python" /><summary type="html"><![CDATA[Extract and save the frames from a video file to local directory.]]></summary></entry><entry><title type="html">lkdhruw-codes</title><link href="http://localhost:4000/android/2023/01/22/welcome-to-jekyll.html" rel="alternate" type="text/html" title="lkdhruw-codes" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/android/2023/01/22/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/android/2023/01/22/welcome-to-jekyll.html"><![CDATA[<p>You’ll find this post in your <code class="language-plaintext highlighter-rouge">_posts</code> directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run <code class="language-plaintext highlighter-rouge">jekyll serve</code>, which launches a web server and auto-regenerates your site when a file is updated.</p>
 
-&lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
+<p>Jekyll requires blog post files to be named according to the following format:</p>
 
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR-MONTH-DAY-title.MARKUP&lt;/code&gt;&lt;/p&gt;
+<p><code class="language-plaintext highlighter-rouge">YEAR-MONTH-DAY-title.MARKUP</code></p>
 
-&lt;p&gt;Where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR&lt;/code&gt; is a four-digit number, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MONTH&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DAY&lt;/code&gt; are both two-digit numbers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MARKUP&lt;/code&gt; is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+<p>Where <code class="language-plaintext highlighter-rouge">YEAR</code> is a four-digit number, <code class="language-plaintext highlighter-rouge">MONTH</code> and <code class="language-plaintext highlighter-rouge">DAY</code> are both two-digit numbers, and <code class="language-plaintext highlighter-rouge">MARKUP</code> is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.</p>
 
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+<p>Jekyll also offers powerful support for code snippets:</p>
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+<figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">def</span> <span class="nf">print_hi</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+  <span class="nb">puts</span> <span class="s2">"Hi, </span><span class="si">#{</span><span class="nb">name</span><span class="si">}</span><span class="s2">"</span>
+<span class="k">end</span>
+<span class="n">print_hi</span><span class="p">(</span><span class="s1">'Tom'</span><span class="p">)</span>
+<span class="c1">#=&gt; prints 'Hi, Tom' to STDOUT.</span></code></pre></figure>
 
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Arduino" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">lkdhruw-codes</title><link href="http://localhost:4000/android/2023/01/22/welcome-to-jekyll.html" rel="alternate" type="text/html" title="lkdhruw-codes" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/android/2023/01/22/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/android/2023/01/22/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
-
-&lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR-MONTH-DAY-title.MARKUP&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR&lt;/code&gt; is a four-digit number, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MONTH&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DAY&lt;/code&gt; are both two-digit numbers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MARKUP&lt;/code&gt; is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
-
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Android" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">fist post</title><link href="http://localhost:4000/arduino/2023/01/22/post-2.html" rel="alternate" type="text/html" title="fist post" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/arduino/2023/01/22/post-2</id><content type="html" xml:base="http://localhost:4000/arduino/2023/01/22/post-2.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
-
-&lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR-MONTH-DAY-title.MARKUP&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR&lt;/code&gt; is a four-digit number, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MONTH&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DAY&lt;/code&gt; are both two-digit numbers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MARKUP&lt;/code&gt; is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
-
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Arduino" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">fist post</title><link href="http://localhost:4000/arduino/2023/01/22/post-3.html" rel="alternate" type="text/html" title="fist post" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/arduino/2023/01/22/post-3</id><content type="html" xml:base="http://localhost:4000/arduino/2023/01/22/post-3.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
-
-&lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR-MONTH-DAY-title.MARKUP&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR&lt;/code&gt; is a four-digit number, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MONTH&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DAY&lt;/code&gt; are both two-digit numbers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MARKUP&lt;/code&gt; is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
-
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Arduino" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry><entry><title type="html">fist post</title><link href="http://localhost:4000/arduino/2023/01/22/post-4.html" rel="alternate" type="text/html" title="fist post" /><published>2023-01-22T19:06:15+05:30</published><updated>2023-01-22T19:06:15+05:30</updated><id>http://localhost:4000/arduino/2023/01/22/post-4</id><content type="html" xml:base="http://localhost:4000/arduino/2023/01/22/post-4.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
-
-&lt;p&gt;Jekyll requires blog post files to be named according to the following format:&lt;/p&gt;
-
-&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR-MONTH-DAY-title.MARKUP&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;Where &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;YEAR&lt;/code&gt; is a four-digit number, &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MONTH&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;DAY&lt;/code&gt; are both two-digit numbers, and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;MARKUP&lt;/code&gt; is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
-
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&apos;Tom&apos;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints &apos;Hi, Tom&apos; to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
-
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name></name></author><category term="Arduino" /><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.</summary></entry></feed>
+<p>Check out the <a href="https://jekyllrb.com/docs/home">Jekyll docs</a> for more info on how to get the most out of Jekyll. File all bugs/feature requests at <a href="https://github.com/jekyll/jekyll">Jekyll’s GitHub repo</a>. If you have questions, you can ask them on <a href="https://talk.jekyllrb.com/">Jekyll Talk</a>.</p>]]></content><author><name></name></author><category term="Android" /><summary type="html"><![CDATA[You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated.]]></summary></entry></feed>
